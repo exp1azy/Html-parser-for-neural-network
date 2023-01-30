@@ -68,6 +68,19 @@ namespace HtmlParser
             }
         }
 
+        public void CollapseSingleChild()
+        {
+            foreach (var current in _textNodes)
+            {
+                while (_all.Count(n => object.ReferenceEquals(current.Parent, n.Parent)) == 1)
+                {
+                    current.Parent = current.Parent.Parent;
+                    current.Name = $"{current.Parent.Name}/{current.Name}";
+                    current.Parent.Parent = null;
+                }
+            }  
+        }
+
         public static void CalculateFeatures(CDOMElement textNode)
         {
             //Regex regex = new Regex(@"\d");
