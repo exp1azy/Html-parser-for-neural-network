@@ -15,7 +15,7 @@ namespace HtmlParser
         private List<CDOMElement> _all;
         public List<CDOMElement> TextNodes => _textNodes;
 
-        private static string[] _tagsToSkip = { "checkbox", "head", "hr", "iframe", "img", "input" };
+        private static string[] _tagsToSkip = { "area", "base", "col", "colgroup", "embed", "hr", "iframe", "img", "input", "link", "meta", "source", "track", "wbr" };
 
         public void Collect(string filePath)
         {
@@ -24,7 +24,7 @@ namespace HtmlParser
             var doc = new HtmlDocument();
             doc.Load(filePath);
             var body = doc.DocumentNode.SelectSingleNode("//body");
-            RecursiveNodeTreeTraversal(new CDOMElement { HtmlSrcNode = body });
+            RecursiveNodeTreeTraversal(new CDOMElement { HtmlSrcNode = body, Name = body.Name, Type = BlockType.Node });
         }
 
         private void RecursiveNodeTreeTraversal(CDOMElement parent)
@@ -72,11 +72,12 @@ namespace HtmlParser
         {
             foreach (var current in _textNodes)
             {
-                while (_all.Count(n => object.ReferenceEquals(current.Parent, n.Parent)) == 1)
+                while (current.Parent != null && _all.Count(n => ReferenceEquals(current.Parent, n.Parent)) == 1)
                 {
-                    current.Parent = current.Parent.Parent;
+                    var newParent = current?.Parent?.Parent;
                     current.Name = $"{current.Parent.Name}/{current.Name}";
                     current.Parent.Parent = null;
+                    current.Parent = newParent;
                 }
             }  
         }
